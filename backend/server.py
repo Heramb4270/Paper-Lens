@@ -1,12 +1,12 @@
 from flask import Flask, request, jsonify
-from PIL import Image
 import torch
+from PIL import Image
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 
 # Initialize Flask app
 app = Flask(__name__)
 
-# Define device
+# Set up device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 
@@ -37,3 +37,4 @@ def ocr():
 # Run the Flask app
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
+
