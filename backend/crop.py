@@ -34,5 +34,6 @@ for page_num, page_image in enumerate(pages, start=1):
         # Crop the line
         line_image = page_image_gray.crop(box)
 
-        # Save the line image
-        line_image.save(f"{output_folder}/page_{page_num}_line_{line_num + 1}.png", "PNG")
+        # Save the line image with formatted line numbers (e.g., line_01, line_02, ...)
+        line_number = f"{line_num + 1:02d}"  # Formats line number as 01, 02, 03, ...
+        line_image.save(f"{output_folder}/page_{page_num}_line_{line_number}.png", "PNG")
