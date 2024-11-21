@@ -130,6 +130,8 @@ def ocr():
     # yet to be implemented
     return jsonify({'message': 'Not implemented yet'})
 
+
+
 # Run the Flask app
 if __name__ == '__main__':
     app.run(debug=True)
