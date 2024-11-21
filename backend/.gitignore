@@ -3,5 +3,4 @@ venv
 .venv
 output_images
 .env
-.__pycache__
-__pycache__
+.output_images
