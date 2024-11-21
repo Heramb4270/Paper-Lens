@@ -1,3 +1,6 @@
+import google.generativeai as genai
+import json
+import requests
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
@@ -5,6 +8,13 @@ from crop import crop_images
 from ImageToText import extract_text_from_folder
 from extract_text import extract_text
 
+import torch
+from dotenv import load_dotenv
+import os
+from PIL import Image
+from transformers import TrOCRProcessor, VisionEncoderDecoderModel
+
+# Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS to allow cross-origin requests
 
