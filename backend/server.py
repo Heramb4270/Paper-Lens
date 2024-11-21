@@ -1,10 +1,19 @@
+import google.generativeai as genai
+import json
+import requests
 from flask import Flask, request, jsonify
 import torch
+from dotenv import load_dotenv
+import os
 from PIL import Image
 from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 
 # Initialize Flask app
 app = Flask(__name__)
+
+load_dotenv()
+
+API_KEY = os.getenv('GEMINI_API_KEY')
 
 # Set up device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
