@@ -7,7 +7,6 @@ import os
 from crop import crop_images
 from ImageToText import extract_text_from_folder
 from extract_text import extract_text
-
 import torch
 from dotenv import load_dotenv
 import os
@@ -17,6 +16,9 @@ from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS to allow cross-origin requests
+
+load_dotenv()
+API_KEY = os.getenv('GEMINI_API_KEY')
 
 # Set up the upload folder
 UPLOAD_FOLDER = './uploads'
@@ -81,10 +83,13 @@ def submit_form():
     student_answer_txt = evaluate_answer_sheet(answer_sheet_path)
     print("\nExtracted Student Answer Text:\n")
     print(student_answer_txt)
+    # answer_key_txt= 'Q.1 a) Define the term "Operating System". (2 Marks) An Operating System (OS) is a software that acts as an interface between the computer hardware and the computer user. It manages hardware resources and provides essential services for computer programs. Q.1 b) Explain the difference between a process and a thread. (2 Marks) A process is an instance of a program in execution, while a thread is a smaller unit of a process that can be scheduled and executed independently.Q.1 c) Describe the functions of an operating system in a computer system. (4 Marks) The functions of an operating system include: Process management: Ensures that processes are scheduled and executed correctly. Memory management: Allocates and deallocates memory space to processes. File system management: Manages files, directories, and access permissions. Device management: Controls input/output devices like printers, displays, etc. Security and access control: Protects system resources from unauthorized access. Q.1 d) What is the role of a kernel in an operating system? (2 Marks) The kernel is the core part of the operating system that manages the system resources, such as the CPU, memory, and devices. It acts as a bridge between applications and hardware.'
+
+    # student_answer_txt = "Q.1 a) An operating system is a software system that manages hardware and provides an interface for users to interact with the computer.b) Process and Thread:A process is a program currently being run by the computer. A thread is a lightweight version of a process that executes a portion of the process's code.c) Functions of Operating System:Processes: Manages the activities of multiple processes.Memory: Ensures all programs and processes have enough memory.Devices: Controls input devices like printers.Security: Protects data and programs from hackers.d) Kernel:The kernel is an essential part of the OS.It manages memory, the CPU, and other resources, acting as an intermediary between software and hardware."
+
+    grading = compare_student_and_model_ans(answer_key_txt,student_answer_txt)
     
     return jsonify(response), 200
-
-
 
 def evaluate_answer_sheet(answer_sheet_path):
  
@@ -93,45 +98,61 @@ def evaluate_answer_sheet(answer_sheet_path):
     
     output_folder = "./output_images"  # Replace with the path to your folder containing images
     final_text = extract_text_from_folder(output_folder)
-    print("Final Extracted Text:\n", final_text)
 
     return final_text
 
+def compare_student_and_model_ans(answer_key_txt, student_answer_txt):
+    # Ensure Google Generative AI is configured
+    genai.configure(api_key=API_KEY)
+    model = genai.GenerativeModel("gemini-1.5-flash")
 
-load_dotenv()
+    try:
+        model_answer = answer_key_txt
+        student_answer = student_answer_txt
 
-API_KEY = os.getenv('GEMINI_API_KEY')
+        # Check for missing data
+        if not model_answer or not student_answer:
+            return jsonify({'error': 'Both model_answer and student_answer are required.'}), 400
 
-# Set up device
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        # Prompt for the AI evaluation
+        prompt = f"""
+        Evaluate the following student's answer against the provided model answer. 
+
+        Model Answer:
+        {model_answer}
+
+        Student Answer:
+        {student_answer}
+
+        Each question has a specific maximum mark, indicated alongside the question. The student's answer is extracted from handwritten text, so it may contain various errors such as grammatical, spelling, or continuity issues. Please ignore these errors and focus on the content to evaluate the answers fairly. 
+
+        For each question:
+        1. Assign marks out of the maximum marks for the question based on accuracy, completeness, and relevance to the model answer.
+
+        For the overall paper:
+        1. Provide total marks based on the cumulative score of all questions.
+        2. Include a brief analysis of the overall performance.
+
+        Return the following:
+        1. Marks for each question.
+        2. Total marks for the entire paper.
+
+        Note : check it moderately and give marks accordingly becuase this marks will be reflected in answer sheet of student.
+        """
+
+        # Generate content using the model
+        response = model.generate_content(prompt)
+        
+        # Extract and return the evaluation
+        #evaluation = response.result  # Adjust based on actual response structure
+        print("Generated Evaluation:\n", response)
+
+        return response
+
+    except Exception as e:
+        print(f"An error occurred while generating the evaluation: {e}")
+        return jsonify({'error': f"An error occurred: {str(e)}"}), 500
 
 
-def load_model_and_processor(checkpoint_path):
-    # Load the fine-tuned model
-    model = VisionEncoderDecoderModel.from_pretrained(checkpoint_path).to(device)
-    # Load the original processor from the base model
-    processor = TrOCRProcessor.from_pretrained("microsoft/trocr-large-handwritten")
-    return model, processor
-
-def extract_text_from_image(image_path, checkpoint_path='./checkpoint-2070'):
-    # Load the model and processor
-    model, processor = load_model_and_processor(checkpoint_path)
-    # Read and process the image
-    image = Image.open(image_path).convert('RGB')
-    pixel_values = processor(image, return_tensors='pt').pixel_values.to(device)
-    # Generate text
-    generated_ids = model.generate(pixel_values)
-    generated_text = processor.batch_decode(generated_ids, skip_special_tokens=True)[0]
-    return generated_text
-
-# Flask route for OCR
-@app.route('/ocr', methods=['POST'])
-def ocr():
-    # yet to be implemented
-    return jsonify({'message': 'Not implemented yet'})
-
-
-
-# Run the Flask app
 if __name__ == '__main__':
     app.run(debug=True)
