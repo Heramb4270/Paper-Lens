@@ -71,10 +71,10 @@ def submit_form():
     student_answer_txt = evaluate_answer_sheet(answer_sheet_path)
     print("\nExtracted Student Answer Text:\n")
     print(student_answer_txt)
+
+    grading = compare_student_and_model_ans(answer_key_txt,student_answer_txt)
     
     return jsonify(response), 200
-
-
 
 def evaluate_answer_sheet(answer_sheet_path):
  
@@ -83,9 +83,58 @@ def evaluate_answer_sheet(answer_sheet_path):
     
     output_folder = "./output_images"  # Replace with the path to your folder containing images
     final_text = extract_text_from_folder(output_folder)
-    print("Final Extracted Text:\n", final_text)
 
     return final_text
+
+def compare_student_and_model_ans(answer_key_txt,student_answer_txt):
+    # Ensure Google Generative AI is configured
+    genai.configure(api_key=API_KEY)
+    model = genai.GenerativeModel("gemini-1.5-flash")
+
+    try:
+        model_answer = answer_key_txt
+        student_answer = student_answer_txt
+
+        # Check for missing data
+        if not model_answer or not student_answer:
+            return jsonify({'error': 'Both model_answer and student_answer are required.'}), 400
+
+        # Prompt for the AI evaluation
+        prompt = f"""
+        Evaluate the following student's answer against the provided model answer. 
+
+        Model Answer:
+        {model_answer}
+
+        Student Answer:
+        {student_answer}
+
+        Each question has a specific maximum mark, indicated alongside the question. The student's answer is extracted from handwritten text, so it may contain various errors such as grammatical, spelling, or continuity issues. Please ignore these errors and focus on the content to evaluate the answers fairly. 
+
+        For each question:
+        1. Assign marks out of the maximum marks for the question based on accuracy, completeness, and relevance to the model answer.
+
+        For the overall paper:
+        1. Provide total marks based on the cumulative score of all questions.
+        2. Include a brief analysis of the overall performance.
+
+        Return the following:
+        1. Marks for each question.
+        2. Total marks for the entire paper.
+
+        Note : check it moderately and give marks accordingly becuase this marks willl be reflected in answer sheet of student.
+        """
+
+        
+        # Generate content using the model
+        response = model.generate_content(prompt)
+        
+        # Extract and return the evaluation
+        evaluation = response.result  # Adjust based on actual response structure
+        print("Generated Evaluation:\n", evaluation)
+
+        return evaluation
+
 
 if __name__ == '__main__':
     app.run(debug=True)
