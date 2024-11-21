@@ -7,7 +7,6 @@ import os
 from crop import crop_images
 from ImageToText import extract_text_from_folder
 from extract_text import extract_text
-
 import torch
 from dotenv import load_dotenv
 import os
@@ -17,6 +16,9 @@ from transformers import TrOCRProcessor, VisionEncoderDecoderModel
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)  # Enable CORS to allow cross-origin requests
+
+load_dotenv()
+API_KEY = os.getenv('GEMINI_API_KEY')
 
 # Set up the upload folder
 UPLOAD_FOLDER = './uploads'
@@ -81,6 +83,9 @@ def submit_form():
     student_answer_txt = evaluate_answer_sheet(answer_sheet_path)
     print("\nExtracted Student Answer Text:\n")
     print(student_answer_txt)
+    # answer_key_txt= 'Q.1 a) Define the term "Operating System". (2 Marks) An Operating System (OS) is a software that acts as an interface between the computer hardware and the computer user. It manages hardware resources and provides essential services for computer programs. Q.1 b) Explain the difference between a process and a thread. (2 Marks) A process is an instance of a program in execution, while a thread is a smaller unit of a process that can be scheduled and executed independently.Q.1 c) Describe the functions of an operating system in a computer system. (4 Marks) The functions of an operating system include: Process management: Ensures that processes are scheduled and executed correctly. Memory management: Allocates and deallocates memory space to processes. File system management: Manages files, directories, and access permissions. Device management: Controls input/output devices like printers, displays, etc. Security and access control: Protects system resources from unauthorized access. Q.1 d) What is the role of a kernel in an operating system? (2 Marks) The kernel is the core part of the operating system that manages the system resources, such as the CPU, memory, and devices. It acts as a bridge between applications and hardware.'
+
+    # student_answer_txt = "Q.1 a) An operating system is a software system that manages hardware and provides an interface for users to interact with the computer.b) Process and Thread:A process is a program currently being run by the computer. A thread is a lightweight version of a process that executes a portion of the process's code.c) Functions of Operating System:Processes: Manages the activities of multiple processes.Memory: Ensures all programs and processes have enough memory.Devices: Controls input devices like printers.Security: Protects data and programs from hackers.d) Kernel:The kernel is an essential part of the OS.It manages memory, the CPU, and other resources, acting as an intermediary between software and hardware."
 
     grading = compare_student_and_model_ans(answer_key_txt,student_answer_txt)
     
@@ -96,7 +101,7 @@ def evaluate_answer_sheet(answer_sheet_path):
 
     return final_text
 
-def compare_student_and_model_ans(answer_key_txt,student_answer_txt):
+def compare_student_and_model_ans(answer_key_txt, student_answer_txt):
     # Ensure Google Generative AI is configured
     genai.configure(api_key=API_KEY)
     model = genai.GenerativeModel("gemini-1.5-flash")
@@ -132,18 +137,21 @@ def compare_student_and_model_ans(answer_key_txt,student_answer_txt):
         1. Marks for each question.
         2. Total marks for the entire paper.
 
-        Note : check it moderately and give marks accordingly becuase this marks willl be reflected in answer sheet of student.
+        Note : check it moderately and give marks accordingly becuase this marks will be reflected in answer sheet of student.
         """
 
-        
         # Generate content using the model
         response = model.generate_content(prompt)
         
         # Extract and return the evaluation
-        evaluation = response.result  # Adjust based on actual response structure
-        print("Generated Evaluation:\n", evaluation)
+        #evaluation = response.result  # Adjust based on actual response structure
+        print("Generated Evaluation:\n", response)
 
-        return evaluation
+        return response
+
+    except Exception as e:
+        print(f"An error occurred while generating the evaluation: {e}")
+        return jsonify({'error': f"An error occurred: {str(e)}"}), 500
 
 
 if __name__ == '__main__':

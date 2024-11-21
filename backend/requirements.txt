@@ -4,3 +4,4 @@ torch
 transformers
 PyPDF2 
 python-docx
+google-generativeai
