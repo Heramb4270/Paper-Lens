@@ -1,6 +1,9 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
+from crop import crop_images
+from ImageToText import extract_text_from_folder
+from extract_text import extract_text
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS to allow cross-origin requests
@@ -61,7 +64,28 @@ def submit_form():
         'answer_sheet_path': answer_sheet_path if answer_sheet else None
     }
 
+    answer_key_txt = extract_text(answer_key_path)
+    print("\nExtracted Answer Key Text:\n")
+    print(answer_key_txt)
+
+    student_answer_txt = evaluate_answer_sheet(answer_sheet_path)
+    print("\nExtracted Student Answer Text:\n")
+    print(student_answer_txt)
+    
     return jsonify(response), 200
+
+
+
+def evaluate_answer_sheet(answer_sheet_path):
+ 
+    crop_images(answer_sheet_path)
+    print("Answer sheet cropped successfully")
+    
+    output_folder = "./output_images"  # Replace with the path to your folder containing images
+    final_text = extract_text_from_folder(output_folder)
+    print("Final Extracted Text:\n", final_text)
+
+    return final_text
 
 if __name__ == '__main__':
     app.run(debug=True)
