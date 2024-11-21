@@ -50,11 +50,6 @@ def extract_text_from_folder(folder_path):
         image_path = os.path.join(folder_path, image_file)
         print(f"Processing {image_path}...")
         extracted_text = ocr_image(image_path)
-        all_text += extracted_text + "\n"
+        all_text += extracted_text + " "
     
     return all_text
-
-# Example usage
-output_folder = "./output_images"  # Replace with the path to your folder containing images
-final_text = extract_text_from_folder(output_folder)
-print("Final Extracted Text:\n", final_text)

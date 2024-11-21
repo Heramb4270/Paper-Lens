@@ -1,4 +1,5 @@
 checkpoint-2070
 venv
 .venv
+output_images
 .env
