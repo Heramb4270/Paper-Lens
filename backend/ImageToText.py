@@ -53,3 +53,7 @@ def extract_text_from_folder(folder_path):
         all_text += extracted_text + " "
     
     return all_text
+# Example usage
+image_path = "./00929.png"  # Replace with your image path
+extracted_text = ocr_image(image_path)
+print("Extracted Text:", extracted_text)
