@@ -116,7 +116,7 @@ def compare_student_and_model_ans(answer_key_txt, student_answer_txt):
 
         # Prompt for the AI evaluation
         prompt = f"""
-        Evaluate the following student's answer against the provided model answer. 
+        Evaluate the following student's answer against the provided model answer.
 
         Model Answer:
         {model_answer}
@@ -124,30 +124,59 @@ def compare_student_and_model_ans(answer_key_txt, student_answer_txt):
         Student Answer:
         {student_answer}
 
-        Each question has a specific maximum mark, indicated alongside the question. The student's answer is extracted from handwritten text, so it may contain various errors such as grammatical, spelling, or continuity issues. Please ignore these errors and focus on the content to evaluate the answers fairly. 
+        Each question has a specific maximum mark, indicated alongside the question. The student's answer is extracted from handwritten text, so it may contain various errors such as grammatical, spelling, or continuity issues. Please ignore these errors and focus on the content to evaluate the answers fairly.
 
         For each question:
         1. Assign marks out of the maximum marks for the question based on accuracy, completeness, and relevance to the model answer.
+        2. Provide feedback for each question, explaining why the marks were awarded or reduced.
 
         For the overall paper:
         1. Provide total marks based on the cumulative score of all questions.
-        2. Include a brief analysis of the overall performance.
+        2. Provide a grade for the subject based on the total marks.
 
-        Return the following:
-        1. Marks for each question.
-        2. Total marks for the entire paper.
-
-        Note : check it moderately and give marks accordingly becuase this marks will be reflected in answer sheet of student.
+        Note: Please evaluate the student's answer moderately. Since the answer sheet is extracted using a model, there may be spelling mistakes or other issues. Do not be too strict or too lenient, as the marks will be directly added to the marksheet of the university.
         """
 
         # Generate content using the model
         response = model.generate_content(prompt)
         
-        # Extract and return the evaluation
-        #evaluation = response.result  # Adjust based on actual response structure
-        print("Generated Evaluation:\n", response)
+        # Process and structure the response in JSON format
+        result = response.result  # This should contain the evaluation, but it needs to be parsed
+        evaluation = json.loads(result)  # Assuming result is a valid JSON string from the AI model
+        
+        # Example structure for the response JSON
+        evaluation_result = {
+            "questions": [],
+            "total_marks": 0,
+            "grade": ""
+        }
+        
+        total_marks = 0
+        for question in evaluation['questions']:
+            question_data = {
+                "question_number": question['question_number'],
+                "question_text": question['question_text'],
+                "marks_obtained": question['marks_obtained'],
+                "feedback": question['feedback']
+            }
+            total_marks += question['marks_obtained']
+            evaluation_result["questions"].append(question_data)
 
-        return response
+        # Assign grade based on total marks
+        if total_marks >= 90:
+            grade = "A"
+        elif total_marks >= 75:
+            grade = "B"
+        elif total_marks >= 50:
+            grade = "C"
+        else:
+            grade = "D"
+
+        evaluation_result["total_marks"] = total_marks
+        evaluation_result["grade"] = grade
+
+        # Return the structured JSON response
+        return jsonify(evaluation_result)
 
     except Exception as e:
         print(f"An error occurred while generating the evaluation: {e}")
