@@ -4,5 +4,3 @@ venv
 output_images
 .env
 __pycache__
-
-*.pyc

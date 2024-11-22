@@ -89,14 +89,14 @@ def submit_form():
 
     grading = compare_student_and_model_ans(answer_key_txt,student_answer_txt)
     
-    return jsonify(response), 200
+    return grading, 200
 
 def evaluate_answer_sheet(answer_sheet_path):
  
-    crop_images(answer_sheet_path)
-    print("Answer sheet cropped successfully")
+    # crop_images(answer_sheet_path)
+    # print("Answer sheet cropped successfully")
     
-    output_folder = "./output_images"  # Replace with the path to your folder containing images
+    output_folder = "./pdf1"  # Replace with the path to your folder containing images
     final_text = extract_text_from_folder(output_folder)
 
     return final_text
@@ -115,39 +115,59 @@ def compare_student_and_model_ans(answer_key_txt, student_answer_txt):
             return jsonify({'error': 'Both model_answer and student_answer are required.'}), 400
 
         # Prompt for the AI evaluation
-        prompt = f"""
-        Evaluate the following student's answer against the provided model answer. 
-
-        Model Answer:
-        {model_answer}
-
-        Student Answer:
-        {student_answer}
-
-        Each question has a specific maximum mark, indicated alongside the question. The student's answer is extracted from handwritten text, so it may contain various errors such as grammatical, spelling, or continuity issues. Please ignore these errors and focus on the content to evaluate the answers fairly. 
-
-        For each question:
-        1. Assign marks out of the maximum marks for the question based on accuracy, completeness, and relevance to the model answer.
-
-        For the overall paper:
-        1. Provide total marks based on the cumulative score of all questions.
-        2. Include a brief analysis of the overall performance.
-
-        Return the following:
-        1. Marks for each question.
-        2. Total marks for the entire paper.
-
-        Note : check it moderately and give marks accordingly becuase this marks will be reflected in answer sheet of student.
-        """
-
+        prompt = f"""Act like you are a teacher who is checking a student's answer sheet. You are given the model answer sheet as 
+        `"{model_answer}"` and the student's answer sheet as `"{student_answer}"`.
+        
+        remember the answer sheet text is extracted from ocr and may contain errors. ignore the errors and evaluate the answer sheet based on the content. you may need to pridict the answer based on the content sometimes. and also question answers may not be in order or labeled properly. do not consider the spelling mistakes in the answer sheet. evaluate the answer sheet based on the content only. some answers may differ from the model answer sheet but may be correct. evaluate the answer sheet based on the content only. its not nessasary that student has written all the answers. some answers may be missing. evaluate the answer sheet based on the content only. if you dont find the answer then give it 0 marks.check the paper lightly.
+        
+        generate responce in json formate only, reffer the following example:
+        {{
+            "total_marks": 30,
+            "obtained_marks": 20,
+            "questions": [
+                {{
+                    "qno": 1,
+                    "question": "Define operating system.",
+                    "marks": 2,
+                    "model_answer": "Operating system is a system software that manages computer hardware, software resources and provides common services for computer programs.",
+                    "student_answer": "Operating system is a interface between user and computer.",
+                    "marks_obtained": 1,
+                    "feedback": "Good attempt. But you missed some points."
+                }},
+                {{
+                    "qno": 2,
+                    "question": "What is the difference between process and thread?",
+                    "marks": 3,
+                    "model_answer": "A process is a program in execution. A thread is a subset of a process. A process can have multiple threads.",
+                    "student_answer": "Process is a program in execution. Thread is a subset of a process.",
+                    "marks_obtained": 2,
+                    "feedback": "Good attempt. But you missed some points."
+                }},
+                {{
+                    "qno": 3,
+                    "question": "What is deadlock?",
+                    "marks": 5,
+                    "model_answer": "Deadlock is a situation where two or more processes are waiting for each other to release resources.",
+                    "student_answer": "Deadlock is a situation where two or more processes are waiting for each other to release resources.",
+                    "marks_obtained": 5,
+                    "feedback": "Good attempt."
+                }}
+            ]
+        }}"""
         # Generate content using the model
         response = model.generate_content(prompt)
         
         # Extract and return the evaluation
         #evaluation = response.result  # Adjust based on actual response structure
-        print("Generated Evaluation:\n", response)
+        print(response.text)
+        str = response.text
+        str = str.replace('```json', '')
+        str = str.replace('```', '')
+        str = str.strip()
+        questions = json.loads(str)
+        print(questions)
 
-        return response
+        return jsonify(questions)
 
     except Exception as e:
         print(f"An error occurred while generating the evaluation: {e}")
