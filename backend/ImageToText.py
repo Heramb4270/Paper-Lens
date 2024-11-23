@@ -65,8 +65,6 @@ def extract_text_from_folder(folder_path):
         else:
             print(f"Skipping {image_file} (does not match line pattern).")
 
-    # Delete the folder containing the images
-    print(f"Deleting folder: {folder_path}")
-    shutil.rmtree(folder_path)
+   
 
     return all_text
