@@ -94,8 +94,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 export default function Marksheet({reportData}) {
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   return (
-    <div className="container mx-auto p-4 items-center ">
-      <Card className="w-full max-w-4xl mx-auto">
+    <div className="p-4 items-center ">
+      <Card className=" ">
         <CardHeader>
           <CardTitle>Student Report Card</CardTitle>
           <CardDescription>Exam Results and Feedback</CardDescription>
@@ -109,7 +109,7 @@ export default function Marksheet({reportData}) {
             </Badge>
           </div>
 
-          <ScrollArea className="h-[400px] rounded-md border">
+          <ScrollArea className="rounded-md border bg-white dark:bg-gray-800 dark:border-gray-700">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -120,8 +120,8 @@ export default function Marksheet({reportData}) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {reportData.questions.map((q) => (
-                  <TableRow key={q.qno}>
+                {reportData.questions.map((q, idx) => (
+                  <TableRow key={idx}>
                     <TableCell className="font-medium">{q.qno}</TableCell>
                     <TableCell>{q.question}</TableCell>
                     <TableCell>
