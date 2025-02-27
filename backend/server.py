@@ -93,10 +93,11 @@ def submit_form():
 
 def evaluate_answer_sheet(answer_sheet_path):
  
-    # crop_images(answer_sheet_path)
-    # print("Answer sheet cropped successfully")
+    crop_images(answer_sheet_path)
+    print("Answer sheet cropped successfully")
     
-    output_folder = "./pdf1"  # Replace with the path to your folder containing images
+    # output_folder = "./pdf1"  # Replace with the path to your folder containing images
+    output_folder = "./output/lines"
     final_text = extract_text_from_folder(output_folder)
 
     return final_text
