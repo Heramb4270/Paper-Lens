@@ -1,11 +1,13 @@
 "use client";
 import React, { useState } from 'react';
+import Marksheet from './Marksheet';
 
 export default function Form() {
     const [answersheetFile, setAnswersheetFile] = useState(null);
     const [studentFile, setStudentFile] = useState(null);
     const [studentFileName, setStudentFileName] = useState('');
     const [answersheetFileName, setAnswersheetFileName] = useState('');
+    const [response, setResponse] = useState(null);
     const [loading, setLoading] = useState(false);
     const [teacher, setTeacher] = useState('');
     const [student, setStudent] = useState('');
@@ -58,14 +60,16 @@ export default function Form() {
             });
 
             const data = await response.json();
+            console.log(data);
 
             if (data.error) {
                 setError(data.error);
             } else {
                 // Check if summary is present in the response
-                if (data.response) {
-                    console.log("Response received:", data.response);
+                if (data) {
+                    console.log("Response received:", data);
                     // You can handle the response further if needed
+                    setResponse(data);
                 } else {
                     setError("Something went wrong. Please try again later.");
                 }
@@ -138,26 +142,26 @@ export default function Form() {
                         <label htmlFor="student-file" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Upload Answer Key</label>
                         {studentFileName ? (
 
-            <div className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600" onClick={() => setFile(null)}>
-            <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                <p className="mb-2 text-sm text-gray-500 dark:text-gray-400 font-semibold">File uploaded successfully</p>
-                <p className="text-xs text-gray-500 dark:text-gray-400">{studentFileName}</p>
-            </div>
-            </div>
-                            
+                            <div className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600" onClick={() => setFile(null)}>
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400 font-semibold">File uploaded successfully</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{studentFileName}</p>
+                                </div>
+                            </div>
+
                         ) : (
                             <div className="flex items-center justify-center mt-3">
-                            <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
-                                    </svg>
-                                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">PDF files only (Max 5MB)</p>
-                                </div>
-                                <input id="dropzone-file" type="file" className="hidden" accept=".pdf" onChange={handleStudentFileChange} />
-                            </label>
-                        </div>
+                                <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                                        </svg>
+                                        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">PDF files only (Max 5MB)</p>
+                                    </div>
+                                    <input id="dropzone-file" type="file" className="hidden" accept=".pdf" onChange={handleStudentFileChange} />
+                                </label>
+                            </div>
                         )}
                     </div>
 
@@ -165,25 +169,25 @@ export default function Form() {
                     <div className="mt-3">
                         <label htmlFor="answersheet-file" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Upload Student Answer Sheet</label>
                         {answersheetFileName ? (
-                           <div className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600" onClick={() => setFile(null)}>
-                           <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                               <p className="mb-2 text-sm text-gray-500 dark:text-gray-400 font-semibold">File uploaded successfully</p>
-                               <p className="text-xs text-gray-500 dark:text-gray-400">{answersheetFileName}</p>
-                           </div>
-                           </div>
+                            <div className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600" onClick={() => setFile(null)}>
+                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400 font-semibold">File uploaded successfully</p>
+                                    <p className="text-xs text-gray-500 dark:text-gray-400">{answersheetFileName}</p>
+                                </div>
+                            </div>
                         ) : (
                             <div className="flex items-center justify-center mt-3">
-                            <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                    <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                        <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
-                                    </svg>
-                                    <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                    <p className="text-xs text-gray-500 dark:text-gray-400">PDF files only (Max 5MB)</p>
-                                </div>
-                                <input id="dropzone-file" type="file" className="hidden" accept=".pdf" onChange={handleAnswersheetFileChange} />
-                            </label>
-                        </div>
+                                <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <svg className="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                            <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                                        </svg>
+                                        <p className="mb-2 text-sm text-gray-500 dark:text-gray-400"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                        <p className="text-xs text-gray-500 dark:text-gray-400">PDF files only (Max 5MB)</p>
+                                    </div>
+                                    <input id="dropzone-file" type="file" className="hidden" accept=".pdf" onChange={handleAnswersheetFileChange} />
+                                </label>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -200,6 +204,9 @@ export default function Form() {
                     <p className="text-red-500 mt-3">{error}</p>
                 )}
             </form>
+
+            {response && <Marksheet reportData={response} />}
+
         </div>
     );
 }

@@ -4,7 +4,7 @@ import React from 'react'
 import SideBar from '@/components/SideBar'
 import { IoSettingsSharp } from "react-icons/io5";
 import { useState } from 'react';
-import Marksheet from '@/components/Marksheet';
+// import Marksheet from '@/components/Marksheet';
 
 export default function Main() {
 
@@ -150,7 +150,7 @@ export default function Main() {
               </div>
             </div>
           }
-          {!loading && response && <Marksheet reportData={response} />}
+          {/* {!loading && response && <Marksheet reportData={response} />} */}
           {error && <div className='text-red-500 text-center'>{error}</div>}
 
         </div>
