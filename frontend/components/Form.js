@@ -205,7 +205,7 @@ export default function Form() {
                 )}
             </form>
 
-            {response && <Marksheet reportData={response} />}
+            {response && <Marksheet reportData={response} name={student} prn={prn} />}
 
         </div>
     );

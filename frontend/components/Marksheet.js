@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-export default function Marksheet({reportData}) {
+export default function Marksheet({ reportData, name, prn }) {
   const [selectedQuestion, setSelectedQuestion] = useState(null);
   return (
     <div className="p-4 items-center ">
@@ -39,8 +39,8 @@ export default function Marksheet({reportData}) {
         </CardHeader>
         <CardContent>
           <div className="mb-6 text-center">
-            <h2 className="text-2xl font-bold mb-2">Heramb Bhoodhar</h2>
-            <p className="text-gray-600 mb-2">PRN : 12320041</p>
+            <h2 className="text-2xl font-bold mb-2">{name}</h2>
+            <p className="text-gray-600 mb-2">PRN : {prn}</p>
             <Badge variant="secondary" className="text-lg">
               Score: {reportData.obtained_marks} / {reportData.total_marks}
             </Badge>
